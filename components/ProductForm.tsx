@@ -3,7 +3,28 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
-export default function ProductForm({ initialData, categories }: any) {
+export interface Category {
+  id: string;
+  name_en: string;
+  sort_order?: number;
+}
+
+export interface Product {
+  id: string;
+  title: string;
+  title_bn: string;
+  category_id: string;
+  price: number;
+  is_available: boolean;
+  image_url?: string | null;
+}
+
+interface ProductFormProps {
+  initialData?: Product | null;
+  categories: Category[];
+}
+
+export default function ProductForm({ initialData, categories }: ProductFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || '');
   const [titleBn, setTitleBn] = useState(initialData?.title_bn || '');

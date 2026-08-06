@@ -2,6 +2,9 @@ import React from 'react';
 import ProductForm, { Category, Product } from '../../../../../components/ProductForm';
 import { supabase } from '../../../../../lib/supabaseClient';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Props { params: { id: string } }
 
 export default async function EditProductPage({ params }: Props) {

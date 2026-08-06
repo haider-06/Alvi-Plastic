@@ -3,6 +3,9 @@ import { supabase } from '../../../lib/supabaseClient';
 import AdminProductTable from '../../../components/AdminProductTable';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardPage() {
   const [{ data: products }, { data: categories }] = await Promise.all([
     supabase.from('products').select('*').order('created_at', { ascending: false }),

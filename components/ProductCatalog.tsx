@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 const DEFAULT_CATEGORIES = [
   { id: 'rack', name: 'Rack' },
   { id: 'balti', name: 'Balti (Bucket)' },
-  { id: 'gamla', name: 'Gamla' },
+  { id: 'gamla', name: 'Gamla (Tub)' },
   { id: 'tool', name: 'Tool / Phri (Stool)' },
   { id: 'jali', name: 'Jali (Net Basket)' },
   { id: 'dala', name: 'Dala / Chalon' },
@@ -65,7 +65,12 @@ export default function ProductCatalog() {
     <section>
       <div className="flex flex-col md:flex-row gap-3 mb-6 items-center">
         <div className="w-full md:w-2/3">
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products or categories..." className="w-full border rounded-xl px-4 py-3 text-sm shadow-sm" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search products or categories..."
+            className="w-full bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl px-4 py-3 text-[16px] md:text-sm shadow-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+          />
         </div>
         <div className="w-full md:w-1/3 flex gap-2">
           <select
@@ -82,7 +87,7 @@ export default function ProductCatalog() {
         </div>
       </div>
 
-      <div className="grid gap-6 product-grid" style={{ '--desktop-cols': desktopColumns } as React.CSSProperties}>
+      <div className="grid product-grid" style={{ '--desktop-cols': desktopColumns } as React.CSSProperties}>
         {loading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 animate-pulse h-64" />
@@ -95,24 +100,33 @@ export default function ProductCatalog() {
       </div>
       <style jsx>{`
         .product-grid {
-          grid-template-columns: repeat(1, minmax(0, 1fr));
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.75rem;
+          padding: 0 0.75rem;
         }
 
         @media (min-width: 640px) {
           .product-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-
-        @media (min-width: 768px) {
-          .product-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            padding: 0 1.5rem;
           }
         }
 
         @media (min-width: 1024px) {
           .product-grid {
             grid-template-columns: repeat(var(--desktop-cols), minmax(0, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            max-width: 112rem;
+            margin: 0 auto;
+          }
+        }
+
+        @media (min-width: 1536px) {
+          .product-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
           }
         }
       `}</style>

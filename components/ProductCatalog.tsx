@@ -28,6 +28,8 @@ export default function ProductCatalog() {
   const [category, setCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const desktopColumns = Math.max(1, Math.ceil(products.length / 2));
+
   useEffect(() => {
     // initialize from URL params
     const q = searchParams?.get('q') ?? '';
@@ -76,7 +78,7 @@ export default function ProductCatalog() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid gap-6 product-grid" style={{ '--desktop-cols': desktopColumns } as React.CSSProperties}>
         {loading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 animate-pulse h-64" />
@@ -87,6 +89,29 @@ export default function ProductCatalog() {
           ))
         )}
       </div>
+      <style jsx>{`
+        .product-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        @media (min-width: 640px) {
+          .product-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 768px) {
+          .product-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .product-grid {
+            grid-template-columns: repeat(var(--desktop-cols), minmax(0, 1fr));
+          }
+        }
+      `}</style>
     </section>
   );
 }

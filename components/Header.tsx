@@ -83,13 +83,13 @@ export default function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products, categories..."
-                className="w-full pl-10 pr-10 py-2.5 bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl text-sm focus:outline-none focus:bg-white focus:text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                className="w-full pl-10 pr-10 py-2.5 bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl text-sm focus:outline-none focus:bg-white focus:text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 transition-all"
                 autoComplete="off"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg border border-slate-300"
                   aria-label="Clear search"
                 >
                   <X size={16} />

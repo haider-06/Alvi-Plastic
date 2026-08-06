@@ -68,10 +68,14 @@ export default function ProductCatalog() {
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products or categories..." className="w-full border rounded-xl px-4 py-3 text-sm shadow-sm" />
         </div>
         <div className="w-full md:w-1/3 flex gap-2">
-          <select value={category ?? ''} onChange={(e) => setCategory(e.target.value || null)} className="w-full border rounded-xl px-4 py-3 text-sm">
-            <option value="">All Categories</option>
+          <select
+            value={category ?? ''}
+            onChange={(e) => setCategory(e.target.value || null)}
+            className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option className="bg-white text-slate-900 py-1" value="">All Categories</option>
             {DEFAULT_CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} className="bg-white text-slate-900 py-1" value={c.id}>{c.name}</option>
             ))}
           </select>
           <button onClick={() => { setCategory(null); setQuery(''); }} className="px-4 py-3 rounded-xl bg-slate-100">Clear</button>

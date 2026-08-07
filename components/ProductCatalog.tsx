@@ -3,23 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from './ProductCard';
 import { supabase } from '../lib/supabaseClient';
+import { useLanguage } from '../context/LanguageContext';
+import { TRANSLATIONS, CATEGORY_LABELS } from '../translations';
 
-const DEFAULT_CATEGORIES = [
-  { id: 'rack', name: 'Rack' },
-  { id: 'balti', name: 'Balti (Bucket)' },
-  { id: 'gamla', name: 'Gamla (Tub)' },
-  { id: 'tool', name: 'Tool / Phri (Stool)' },
-  { id: 'jali', name: 'Jali (Net Basket)' },
-  { id: 'dala', name: 'Dala / Chalon' },
-  { id: 'basket', name: 'Basket' },
-  { id: 'kula', name: 'Kula' },
-  { id: 'setbati', name: 'Set Bati' },
-  { id: 'jug', name: 'Jug' },
-  { id: 'dhakna', name: 'Dhakna Jali' },
-  { id: 'plate', name: 'Plate & Glass' },
-  { id: 'container', name: 'Container' },
-  { id: 'others', name: 'Others' }
-];
+const DEFAULT_CATEGORIES = CATEGORY_LABELS;
 
 export default function ProductCatalog() {
   const searchParams = useSearchParams();
@@ -61,6 +48,8 @@ export default function ProductCatalog() {
     }
   }
 
+  const { language } = useLanguage();
+
   return (
     <section>
       <div className="flex flex-col md:flex-row gap-3 mb-6 items-center">
@@ -68,7 +57,7 @@ export default function ProductCatalog() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search products or categories..."
+            placeholder={TRANSLATIONS.searchPlaceholder[language]}
             className="w-full bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl px-4 py-3 text-[16px] md:text-sm shadow-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -78,12 +67,12 @@ export default function ProductCatalog() {
             onChange={(e) => setCategory(e.target.value || null)}
             className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
-            <option className="bg-white text-slate-900 py-1" value="">All Categories</option>
+            <option className="bg-white text-slate-900 py-1" value="">{TRANSLATIONS.allCategories[language]}</option>
             {DEFAULT_CATEGORIES.map((c) => (
-              <option key={c.id} className="bg-white text-slate-900 py-1" value={c.id}>{c.name}</option>
+              <option key={c.id} className="bg-white text-slate-900 py-1" value={c.id}>{language === 'bn' ? c.bn : c.en}</option>
             ))}
           </select>
-          <button onClick={() => { setCategory(null); setQuery(''); }} className="px-4 py-3 rounded-xl bg-slate-100">Clear</button>
+          <button onClick={() => { setCategory(null); setQuery(''); }} className="px-4 py-3 rounded-xl bg-slate-100">{TRANSLATIONS.clearButton[language]}</button>
         </div>
       </div>
 

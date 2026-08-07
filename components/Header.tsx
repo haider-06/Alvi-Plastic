@@ -3,23 +3,11 @@ import { Phone, Search, X, ChevronDown } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import Logo from './Logo';
+import { useLanguage } from '../context/LanguageContext';
+import { TRANSLATIONS, CATEGORY_LABELS } from '../translations';
 
-const CATEGORIES = [
-  { id: 'rack', name: 'Rack' },
-  { id: 'balti', name: 'Balti (Bucket)' },
-  { id: 'gamla', name: 'Gamla (Tub)' },
-  { id: 'tool', name: 'Tool / Phri (Stool)' },
-  { id: 'jali', name: 'Jali (Net Basket)' },
-  { id: 'dala', name: 'Dala / Chalon' },
-  { id: 'basket', name: 'Basket' },
-  { id: 'kula', name: 'Kula' },
-  { id: 'setbati', name: 'Set Bati' },
-  { id: 'jug', name: 'Jug' },
-  { id: 'dhakna', name: 'Dhakna Jali' },
-  { id: 'plate', name: 'Plate & Glass' },
-  { id: 'container', name: 'Container' },
-  { id: 'others', name: 'Others' },
-];
+const CATEGORIES = CATEGORY_LABELS;
 
 const CONTACT_DETAILS = {
   proprietor: { label: 'Md. Ripon', phone: '+8801911387551' },
@@ -45,6 +33,7 @@ const CONTACT_DETAILS = {
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language, setLanguage } = useLanguage();
   const [searchQuery, setSearchQuery] = useState(searchParams?.get('q') ?? '');
   const [activeCategory, setActiveCategory] = useState<string | null>(searchParams?.get('cat') ?? null);
   const [contactOpen, setContactOpen] = useState(false);
@@ -78,13 +67,7 @@ export default function Header() {
         <div className="flex flex-col xl:flex-row items-center justify-between gap-4 py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
-              <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white text-emerald-600 font-bold">AP</div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">ALVI PLASTIC</h1>
-              <p className="text-xs text-slate-500">Factory Direct Wholesale</p>
-            </div>
+            <Logo />
           </div>
 
           {/* Search Bar */}
@@ -95,7 +78,7 @@ export default function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, categories..."
+                placeholder={TRANSLATIONS.searchPlaceholder[language]}
                 className="w-full pl-10 pr-10 py-2.5 bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl text-sm focus:outline-none focus:bg-white focus:text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 transition-all"
                 autoComplete="off"
               />
@@ -103,7 +86,7 @@ export default function Header() {
                 <button
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg border border-slate-300"
-                  aria-label="Clear search"
+                  aria-label={TRANSLATIONS.clearButton[language]}
                 >
                   <X size={16} />
                 </button>
@@ -111,17 +94,30 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="relative" ref={contactDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setContactOpen((prev) => !prev)}
-              aria-expanded={contactOpen}
-              className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-slate-100 text-slate-900 rounded-xl text-sm font-medium hover:bg-slate-200 transition"
-            >
-              <Phone size={18} />
-              Contact
-              <ChevronDown size={16} className="text-slate-500" />
-            </button>
+          <div className="flex items-center gap-2">
+            <div className="rounded-full border border-slate-200 bg-slate-100 p-1 flex items-center text-sm">
+              {(['en', 'bn'] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setLanguage(lang)}
+                  className={`min-w-[72px] rounded-full px-3 py-2 transition ${language === lang ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  {lang === 'en' ? 'EN' : 'বাংলা'}
+                </button>
+              ))}
+            </div>
+            <div className="relative" ref={contactDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setContactOpen((prev) => !prev)}
+                aria-expanded={contactOpen}
+                className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-slate-100 text-slate-900 rounded-xl text-sm font-medium hover:bg-slate-200 transition"
+              >
+                <Phone size={18} />
+                {TRANSLATIONS.contactButton[language]}
+                <ChevronDown size={16} className="text-slate-500" />
+              </button>
             <div
               className={`absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5 transition-all duration-200 ${
                 contactOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
@@ -192,7 +188,7 @@ export default function Header() {
                 }`}
                 aria-pressed={activeCategory === cat.id}
               >
-                {cat.name}
+                {language === 'bn' ? cat.bn : cat.en}
               </button>
             ))}
           </div>

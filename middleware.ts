@@ -3,6 +3,11 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (pathname === '/admin/login') {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/admin')) {
     const token = req.cookies.get('sb_access_token');
     if (!token) {
@@ -11,6 +16,7 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
+
   return NextResponse.next();
 }
 

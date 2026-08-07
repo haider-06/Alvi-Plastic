@@ -118,51 +118,50 @@ export default function Header() {
                 {TRANSLATIONS.contactButton[language]}
                 <ChevronDown size={16} className="text-slate-500" />
               </button>
-            </div>
-            <div
-              className={`absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5 transition-all duration-200 ${
-                contactOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-              }`}
-            >
-              <div className="p-4">
-                <div className="mb-3 text-xs uppercase tracking-[0.24em] text-slate-500">Contact Details</div>
-                <div className="space-y-4 text-sm text-slate-700">
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-slate-900 font-semibold">Proprietor</div>
-                    <a href={`tel:${CONTACT_DETAILS.proprietor.phone}`} className="mt-1 block text-emerald-700">{CONTACT_DETAILS.proprietor.label}: {CONTACT_DETAILS.proprietor.phone.replace('+880', '0')}</a>
-                  </div>
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-slate-900 font-semibold">Head Office</div>
-                    <div className="mt-1 text-slate-600">{CONTACT_DETAILS.headOffice.address}</div>
-                    <div className="mt-2 space-y-1">
-                      {CONTACT_DETAILS.headOffice.people.map((person) => (
-                        <a key={person.phone} href={`tel:${person.phone}`} className="block text-emerald-700">{person.label}: {person.phone.replace('+880', '0')}</a>
-                      ))}
+              <div
+                className={`fixed inset-x-4 top-20 z-50 mt-2 w-[90vw] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl transition-all duration-200 md:absolute md:inset-auto md:right-0 md:top-full md:mt-2 ${
+                  contactOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+                }`}
+              >
+                <div className="max-h-[80vh] overflow-y-auto">
+                  <div className="mb-3 text-xs uppercase tracking-[0.24em] text-slate-500">Contact Details</div>
+                  <div className="space-y-4 text-sm text-slate-700">
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="text-slate-900 font-semibold">Proprietor</div>
+                      <a href={`tel:${CONTACT_DETAILS.proprietor.phone}`} className="mt-1 block text-emerald-700">{CONTACT_DETAILS.proprietor.label}: {CONTACT_DETAILS.proprietor.phone.replace('+880', '0')}</a>
                     </div>
-                  </div>
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-slate-900 font-semibold">Showroom</div>
-                    <div className="mt-1 text-slate-600">{CONTACT_DETAILS.showroom.address}</div>
-                    <div className="mt-2 space-y-1">
-                      {CONTACT_DETAILS.showroom.people.map((person) => (
-                        <a key={person.phone} href={`tel:${person.phone}`} className="block text-emerald-700">{person.label}: {person.phone.replace('+880', '0')}</a>
-                      ))}
-                      <a href={`tel:${CONTACT_DETAILS.showroom.tel}`} className="block text-emerald-700">Tel: {CONTACT_DETAILS.showroom.tel}</a>
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="text-slate-900 font-semibold">Head Office</div>
+                      <div className="mt-1 text-slate-600">{CONTACT_DETAILS.headOffice.address}</div>
+                      <div className="mt-2 space-y-1">
+                        {CONTACT_DETAILS.headOffice.people.map((person) => (
+                          <a key={person.phone} href={`tel:${person.phone}`} className="block text-emerald-700">{person.label}: {person.phone.replace('+880', '0')}</a>
+                        ))}
+                      </div>
                     </div>
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="text-slate-900 font-semibold">Showroom</div>
+                      <div className="mt-1 text-slate-600">{CONTACT_DETAILS.showroom.address}</div>
+                      <div className="mt-2 space-y-1">
+                        {CONTACT_DETAILS.showroom.people.map((person) => (
+                          <a key={person.phone} href={`tel:${person.phone}`} className="block text-emerald-700">{person.label}: {person.phone.replace('+880', '0')}</a>
+                        ))}
+                        <a href={`tel:${CONTACT_DETAILS.showroom.tel}`} className="block text-emerald-700">Tel: {CONTACT_DETAILS.showroom.tel}</a>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/${CONTACT_DETAILS.whatsapp.phone.replace('+880', '880')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-white font-semibold hover:bg-emerald-700 transition"
+                    >
+                      <Phone size={16} /> {CONTACT_DETAILS.whatsapp.label}
+                    </a>
                   </div>
-                  <a
-                    href={`https://wa.me/${CONTACT_DETAILS.whatsapp.phone.replace('+880', '880')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-white font-semibold hover:bg-emerald-700 transition"
-                  >
-                    <Phone size={16} /> {CONTACT_DETAILS.whatsapp.label}
-                  </a>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Category Filter Bar */}
         <div className="border-t border-slate-200 pt-4">
@@ -195,6 +194,7 @@ export default function Header() {
           </div>
         </div>
       </div>
+    </div>
 
     </header>
   );

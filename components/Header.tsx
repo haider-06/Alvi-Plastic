@@ -118,6 +118,7 @@ export default function Header() {
                 {TRANSLATIONS.contactButton[language]}
                 <ChevronDown size={16} className="text-slate-500" />
               </button>
+            </div>
             <div
               className={`absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5 transition-all duration-200 ${
                 contactOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'

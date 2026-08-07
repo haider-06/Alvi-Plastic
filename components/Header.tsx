@@ -68,7 +68,6 @@ export default function Header() {
           <div className="flex items-center justify-between gap-4 py-3">
             <div className="flex items-center gap-3 flex-shrink-0">
               <Logo />
-              <span className="text-lg font-bold tracking-[0.16em] text-slate-900 uppercase">ALVI PLASTIC</span>
             </div>
 
             <div className="flex-1 max-w-xl min-w-[200px] mx-2 md:mx-6 min-w-0">

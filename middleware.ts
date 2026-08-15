@@ -20,15 +20,19 @@ export async function middleware(request: NextRequest) {
       get(name: string) {
         return request.cookies.get(name)?.value
       },
-      set(name: string, value: string, options: any) {
+      set(name: string, value: string, options?: any) {
         request.cookies.set(name, value)
         response = NextResponse.next({ request })
-        response.cookies.set(name, value, options)
+        if (options) {
+          response.cookies.set(name, value, options)
+        }
       },
-      remove(name: string, options: any) {
+      remove(name: string, options?: any) {
         request.cookies.delete(name)
         response = NextResponse.next({ request })
-        response.cookies.delete(name)
+        if (options) {
+          response.cookies.delete(name)
+        }
       },
     },
   })
@@ -36,7 +40,6 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const pathname = request.nextUrl.pathname
 
-  // 1. Allow login route
   if (pathname === '/admin/login') {
     if (session) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url))
@@ -44,7 +47,6 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // 2. Protect all other admin routes
   if (pathname.startsWith('/admin') && !session) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }

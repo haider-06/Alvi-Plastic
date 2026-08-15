@@ -26,27 +26,26 @@ export async function middleware(request: NextRequest) {
         response.cookies.set(name, value, options)
       },
       remove(name: string, options: any) {
-        request.cookies.set(name, '')
+        request.cookies.delete(name)
         response = NextResponse.next({ request })
-        response.cookies.set(name, '', options)
+        response.cookies.delete(name)
       },
     },
   })
 
   const { data: { session } } = await supabase.auth.getSession()
-  const path = request.nextUrl.pathname
+  const pathname = request.nextUrl.pathname
 
-  // 1. Explicitly allow public access to /admin/login
-  if (path === '/admin/login') {
+  // 1. Allow login route
+  if (pathname === '/admin/login') {
     if (session) {
-      // If already logged in, redirect away from login page to dashboard
       return NextResponse.redirect(new URL('/admin/dashboard', request.url))
     }
     return response
   }
 
-  // 2. Protect all other /admin routes (e.g. /admin, /admin/dashboard, /admin/products/*)
-  if (path.startsWith('/admin') && !session) {
+  // 2. Protect all other admin routes
+  if (pathname.startsWith('/admin') && !session) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 

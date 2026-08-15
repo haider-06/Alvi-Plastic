@@ -19,33 +19,87 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await supabase.auth.signInWithPassword({ email, password });
-    if (res.error || !res.data.session) {
-      setError(res.error?.message || 'Login failed');
+
+    try {
+      const res = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (res.error || !res.data.session) {
+        setError(res.error?.message || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      // Send tokens to server to set httpOnly cookies for middleware
+      const cookieResponse = await fetch('/api/auth/set-cookie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_token: res.data.session.access_token,
+          refresh_token: res.data.session.refresh_token,
+        }),
+      });
+
+      if (!cookieResponse.ok) {
+        setError('Failed to set session cookie');
+        setLoading(false);
+        return;
+      }
+
       setLoading(false);
-      return;
+      // Refresh to sync auth cookie with Server Components and Middleware
+      router.refresh();
+      router.push('/admin/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
     }
-    // Send token to server to set httpOnly cookie for middleware
-    await fetch('/api/auth/set-cookie', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: res.data.session.access_token })
-    });
-    setLoading(false);
-    // Refresh to sync auth cookie with Server Components and Middleware
-    router.refresh();
-    router.push('/admin/dashboard');
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Admin Login</h2>
-      <form onSubmit={handleLogin} className="space-y-3">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full border rounded px-3 py-2" />
-        <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" className="w-full border rounded px-3 py-2" />
-        {error && <div className="text-red-600">{error}</div>}
-        <button type="submit" disabled={loading} className="w-full bg-emerald text-white px-3 py-2 rounded">{loading ? 'Signing in...' : 'Sign in'}</button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@example.com"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              required
+            />
+          </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+              {error}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium px-4 py-2 rounded transition-colors"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

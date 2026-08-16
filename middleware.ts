@@ -1,59 +1,50 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  const path = request.nextUrl.pathname;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // CRITICAL: Always allow public access to /admin/login
+  if (path === '/admin/login') {
+    return NextResponse.next();
+  }
+
+  let response = NextResponse.next({
+    request: { headers: request.headers },
+  });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return response
+    return response;
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value
+      getAll() {
+        return request.cookies.getAll();
       },
-      set(name: string, value: string, options?: any) {
-        request.cookies.set(name, value)
-        response = NextResponse.next({ request })
-        if (options) {
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options)
-        }
-      },
-      remove(name: string, options?: any) {
-        request.cookies.delete(name)
-        response = NextResponse.next({ request })
-        if (options) {
-          response.cookies.delete(name)
-        }
+        );
       },
     },
-  })
+  });
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const pathname = request.nextUrl.pathname
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (pathname === '/admin/login') {
-    if (session) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
-    }
-    return response
+  // Guard protected routes (/admin/dashboard, /admin/products)
+  if (path.startsWith('/admin') && !session) {
+    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  if (pathname.startsWith('/admin') && !session) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
-  }
-
-  return response
+  return response;
 }
 
 export const config = {
   matcher: ['/admin/:path*'],
-}
+};

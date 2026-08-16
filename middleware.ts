@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+
   // CRITICAL: Always allow public access to /admin/login
   if (path === '/admin/login') {
     return NextResponse.next();
@@ -14,11 +15,47 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnonKey) {
-    return response;
-  }
+  return response;
+}
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -35,7 +72,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const { data: { session } } = await supabase.auth.getSession();
+
 
   // Guard protected routes (/admin/dashboard, /admin/products)
   if (path.startsWith('/admin') && !session) {
@@ -47,4 +84,3 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/admin/:path*'],
-};

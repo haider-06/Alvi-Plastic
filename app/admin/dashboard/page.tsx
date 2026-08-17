@@ -1,44 +1,55 @@
 'use client';
+
 export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabaseClient';
 import AdminProductTable from '@/components/AdminProductTable';
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
+
   useEffect(() => {
-    let mounted = true;
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session && mounted) {
-        router.replace('/admin/login');
-      } else if (mounted) {
-      setLoading(false);
+    let isMounted = true;
+
+    async function checkAuth() {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+
+        if (error || !user) {
+          if (isMounted) router.replace('/admin/login');
+        } else if (isMounted) {
+          setLoading(false);
+        }
+      } catch {
+        if (isMounted) router.replace('/admin/login');
       }
-    };
-    checkSession();
+    }
+
+    checkAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if ((event === 'SIGNED_OUT' || !session) && mounted) {
+      if ((event === 'SIGNED_OUT' || !session) && isMounted) {
         router.replace('/admin/login');
-      } else if (session && mounted) {
+      } else if (session && isMounted) {
         setLoading(false);
       }
     });
+
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [router, supabase]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.refresh();
-    router.push('/admin/login');
+    window.location.href = '/admin/login';
   };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -49,21 +60,22 @@ export default function AdminDashboardPage() {
       </div>
     );
   }
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between pb-6 border-b border-slate-200 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Product Management</h1>
           <p className="text-xs sm:text-sm text-slate-500">Upload images, edit pricing, and update stock status</p>
-      </div>
+        </div>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-sm rounded-xl border border-rose-200 transition"
+          className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium text-sm rounded-xl border border-rose-200 transition cursor-pointer"
         >
           Logout
         </button>
       </div>
-      <AdminProductTable />
+      <AdminProductTable/>
     </div>
   );
 }

@@ -1,124 +1,73 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import ProductCard from './ProductCard';
-import { supabase } from '../lib/supabaseClient';
-import { useLanguage } from '../context/LanguageContext';
-import { TRANSLATIONS, CATEGORY_LABELS } from '../translations';
 
-const DEFAULT_CATEGORIES = CATEGORY_LABELS;
+import React, { useEffect, useState, useMemo } from 'react';
+import ProductCard, { Product } from './ProductCard';
+import { createClient } from '@/lib/supabaseClient';
 
-export default function ProductCatalog() {
-  const searchParams = useSearchParams();
-  const [products, setProducts] = useState<any[]>([]);
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+interface CatalogProps {
+  searchQuery?: string;
+  selectedCategory?: string;
+}
 
-  const desktopColumns = Math.max(1, Math.ceil(products.length / 2));
-
-  useEffect(() => {
-    // initialize from URL params
-    const q = searchParams?.get('q') ?? '';
-    const cat = searchParams?.get('cat') ?? null;
-    setQuery(q);
-    setCategory(cat);
-  }, [searchParams]);
+export default function ProductCatalog({
+  searchQuery = '',
+  selectedCategory = 'all',
+}: CatalogProps) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchProducts();
-  }, [query, category]);
+    async function loadProducts() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  async function fetchProducts() {
-    setLoading(true);
-    try {
-      let q = supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (category) q = q.eq('category_id', category);
-      const res = await q;
-      if ('data' in res) {
-        let data = res.data as any[];
-        if (query) {
-          const ql = query.toLowerCase();
-          data = data.filter((p) => (p.title || '').toLowerCase().includes(ql));
-        }
+      if (!error && data) {
         setProducts(data);
       }
-    } finally {
       setLoading(false);
     }
-  }
+    loadProducts();
+  }, [supabase]);
 
-  const { language } = useLanguage();
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchCat =
+        selectedCategory === 'all' ||
+        p.category.toLowerCase() === selectedCategory.toLowerCase();
+
+      const query = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !query ||
+        p.name.toLowerCase().includes(query) ||
+        (p.name_bn && p.name_bn.toLowerCase().includes(query)) ||
+        p.category.toLowerCase().includes(query);
+
+      return matchCat && matchSearch;
+    });
+  }, [products, selectedCategory, searchQuery]);
 
   return (
-    <section>
-      <div className="flex flex-col md:flex-row gap-3 mb-6 items-center">
-        <div className="w-full md:w-2/3">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={TRANSLATIONS.searchPlaceholder[language]}
-            className="w-full bg-white text-slate-900 border border-slate-300 placeholder:text-slate-400 rounded-xl px-4 py-3 text-[16px] md:text-sm shadow-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
-          />
+    <section id="catalog" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {loading ? (
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium text-sm">Loading product catalog...</p>
         </div>
-        <div className="w-full md:w-1/3 flex gap-2">
-          <select
-            value={category ?? ''}
-            onChange={(e) => setCategory(e.target.value || null)}
-            className="w-full bg-white text-slate-900 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-          >
-            <option className="bg-white text-slate-900 py-1" value="">{TRANSLATIONS.allCategories[language]}</option>
-            {DEFAULT_CATEGORIES.map((c) => (
-              <option key={c.id} className="bg-white text-slate-900 py-1" value={c.id}>{language === 'bn' ? c.bn : c.en}</option>
-            ))}
-          </select>
-          <button onClick={() => { setCategory(null); setQuery(''); }} className="px-4 py-3 rounded-xl bg-slate-100">{TRANSLATIONS.clearButton[language]}</button>
+      ) : filteredProducts.length === 0 ? (
+        <div className="py-20 text-center bg-white rounded-2xl border border-slate-200 p-8 max-w-md mx-auto">
+          <p className="text-slate-600 font-medium">No products found matching your filter.</p>
         </div>
-      </div>
-
-      <div className="grid product-grid" style={{ '--desktop-cols': desktopColumns } as React.CSSProperties}>
-        {loading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 animate-pulse h-64" />
-          ))
-        ) : (
-          products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))
-        )}
-      </div>
-      <style jsx>{`
-        .product-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 0.75rem;
-          padding: 0 0.75rem;
-        }
-
-        @media (min-width: 640px) {
-          .product-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 1rem;
-            padding: 0 1.5rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .product-grid {
-            grid-template-columns: repeat(var(--desktop-cols), minmax(0, 1fr));
-            gap: 1.5rem;
-            padding: 0;
-            max-width: 112rem;
-            margin: 0 auto;
-          }
-        }
-
-        @media (min-width: 1536px) {
-          .product-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-          }
-        }
-      `}</style>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-6">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

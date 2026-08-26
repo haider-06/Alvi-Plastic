@@ -99,10 +99,10 @@ export default function Header({
             <Image
               src="/logo.PNG"
               alt="Alvi Plastic"
-              width={140}
-              height={42}
+              width={180}
+              height={60}
               priority
-              className="h-9 md:h-11 w-auto object-contain"
+              className="h-12 md:h-14 w-auto object-contain"
             />
           </Link>
 
@@ -210,7 +210,7 @@ export default function Header({
                   </div>
 
                   <a
-                    href="https://wa.me/8801911387551"
+                    href="https://wa.me/8801322465611"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow transition text-sm cursor-pointer"

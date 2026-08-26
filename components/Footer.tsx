@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
   const { lang, t } = useLanguage();
-  const whatsappUrl = 'https://wa.me/8801911387551';
+  const whatsappUrl = 'https://wa.me/8801322465611';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(whatsappUrl)}`;
 
   return (

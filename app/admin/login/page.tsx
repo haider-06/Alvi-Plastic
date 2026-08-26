@@ -28,15 +28,20 @@ export default function AdminLoginPage() {
         return;
       }
 
+      if (data?.user && !data?.session) {
+        setErrorMsg('Email not confirmed in Supabase dashboard.');
+        setLoading(false);
+        return;
+      }
+
       if (data?.session) {
-        // Use full navigation so middleware immediately detects the auth cookie
         window.location.href = '/admin/dashboard';
       } else {
-        setErrorMsg('Login failed. Please verify your credentials.');
+        setErrorMsg('Could not establish an active session.');
         setLoading(false);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'An unexpected error occurred.');
+      setErrorMsg(err.message || 'An unexpected error occurred during login.');
       setLoading(false);
     }
   };
@@ -45,7 +50,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
         <h1 className="text-2xl font-bold text-slate-800 text-center mb-6">
-          M/S Alvi Plastic Admin
+          Alvi Plastic Admin
         </h1>
 
         {errorMsg && (
@@ -84,7 +89,7 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow transition disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? 'Verifying...' : 'Sign In'}
           </button>
         </form>
       </div>

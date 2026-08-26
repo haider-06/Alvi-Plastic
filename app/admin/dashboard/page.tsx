@@ -65,8 +65,8 @@ export default function AdminDashboardPage() {
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between pb-6 border-b border-slate-200 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Product Management</h1>
-          <p className="text-xs sm:text-sm text-slate-500">Upload images, edit pricing, and update stock status</p>
+          <h1 className="text-2xl font-bold text-slate-800">Alvi Plastic Admin</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Upload images, edit product details, weights, and stock status</p>
         </div>
         <button
           onClick={handleLogout}

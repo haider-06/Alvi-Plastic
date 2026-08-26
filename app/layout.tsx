@@ -3,8 +3,8 @@ import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 export const metadata: Metadata = {
-  title: 'M/S Alvi Plastic | Factory Direct Wholesale',
-  description: 'Wholesale plastic products manufacturer and distributor in Dhaka, Bangladesh.',
+  title: 'Alvi Plastic | Factory Direct Wholesale',
+  description: 'Direct factory wholesale plastic manufacturer and distributor in Bangladesh.',
 };
 
 export const viewport: Viewport = {
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="bn">
       <body className="min-h-screen bg-slate-50 text-slate-900">
         <LanguageProvider>
           {children}

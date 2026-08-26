@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabaseClient';
-import { Plus, Trash2, Upload, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X } from 'lucide-react';
 import { CATEGORIES } from './Header';
 
 interface Product {
@@ -11,7 +11,7 @@ interface Product {
   name: string;
   name_bn?: string;
   category: string;
-  price?: number;
+  weight_kg?: number;
   in_stock: boolean;
   image_url?: string;
 }
@@ -19,13 +19,16 @@ interface Product {
 export default function AdminProductTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Form State
   const [name, setName] = useState('');
   const [nameBn, setNameBn] = useState('');
   const [category, setCategory] = useState('rack');
-  const [price, setPrice] = useState('');
+  const [weightKg, setWeightKg] = useState('');
   const [inStock, setInStock] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -49,11 +52,33 @@ export default function AdminProductTable() {
     fetchProducts();
   }, []);
 
-  const handleAddProduct = async (e: React.FormEvent) => {
+  const openAddModal = () => {
+    setEditingProduct(null);
+    setName('');
+    setNameBn('');
+    setCategory('rack');
+    setWeightKg('');
+    setInStock(true);
+    setImageFile(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setName(product.name);
+    setNameBn(product.name_bn || '');
+    setCategory(product.category);
+    setWeightKg(product.weight_kg ? product.weight_kg.toString() : '');
+    setInStock(product.in_stock);
+    setImageFile(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
-    let uploadedImageUrl = '';
+    let finalImageUrl = editingProduct?.image_url || '';
 
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop();
@@ -66,30 +91,38 @@ export default function AdminProductTable() {
         const { data: publicUrlData } = supabase.storage
           .from('product-images')
           .getPublicUrl(fileName);
-        uploadedImageUrl = publicUrlData.publicUrl;
+        finalImageUrl = publicUrlData.publicUrl;
       }
     }
 
-    const { error: insertError } = await supabase.from('products').insert([
-      {
-        name,
-        name_bn: nameBn || null,
-        category,
-        price: price ? parseFloat(price) : 0,
-        in_stock: inStock,
-        image_url: uploadedImageUrl || null,
-      },
-    ]);
+    const payload = {
+      name,
+      name_bn: nameBn || null,
+      category,
+      weight_kg: weightKg ? parseFloat(weightKg) : 0,
+      in_stock: inStock,
+      image_url: finalImageUrl || null,
+    };
 
-    if (!insertError) {
-      setName('');
-      setNameBn('');
-      setCategory('rack');
-      setPrice('');
-      setImageFile(null);
-      setShowAddModal(false);
-      fetchProducts();
+    if (editingProduct) {
+      const { error } = await supabase
+        .from('products')
+        .update(payload)
+        .eq('id', editingProduct.id);
+
+      if (!error) {
+        setIsModalOpen(false);
+        fetchProducts();
+      }
+    } else {
+      const { error } = await supabase.from('products').insert([payload]);
+
+      if (!error) {
+        setIsModalOpen(false);
+        fetchProducts();
+      }
     }
+
     setSubmitting(false);
   };
 
@@ -118,23 +151,32 @@ export default function AdminProductTable() {
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Products ({products.length})</h2>
-          <p className="text-xs text-slate-500">Live database entries</p>
+          <h2 className="text-lg font-bold text-slate-800">Products Catalog ({products.length})</h2>
+          <p className="text-xs text-slate-500">Manage catalog entries, weights, and availability</p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow transition"
+          onClick={openAddModal}
+          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow transition cursor-pointer"
         >
-          <Plus className="w-4 h-4"/>
+          <Plus className="w-4 h-4" />
           <span>Add New Product</span>
         </button>
       </div>
 
-      {showAddModal && (
+      {/* Add / Edit Modal */}
+      {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Add New Product</h3>
-            <form onSubmit={handleAddProduct} className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <h3 className="text-lg font-bold text-slate-800">
+                {editingProduct ? 'Edit Product' : 'Add New Product'}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Product Name (English) *</label>
                 <input
@@ -143,7 +185,7 @@ export default function AdminProductTable() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                  placeholder="e.g. 4-Layer Corner Rack"
+                  placeholder="e.g. 4-Layer Heavy Rack"
                 />
               </div>
 
@@ -154,7 +196,7 @@ export default function AdminProductTable() {
                   value={nameBn}
                   onChange={(e) => setNameBn(e.target.value)}
                   className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                  placeholder="e.g. ৪-ধাপের কর্নার র‍্যাক"
+                  placeholder="e.g. ৪-ধাপের হেভি র‍্যাক"
                 />
               </div>
 
@@ -174,19 +216,30 @@ export default function AdminProductTable() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Price in BDT (৳)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Weight in KG (কেজি)</label>
                   <input
                     type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    step="0.01"
+                    value={weightKg}
+                    onChange={(e) => setWeightKg(e.target.value)}
                     className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g. 450"
+                    placeholder="e.g. 1.25"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Product Image</label>
+                {editingProduct?.image_url && !imageFile && (
+                  <div className="mb-2 flex items-center gap-2">
+                    <img
+                      src={editingProduct.image_url}
+                      alt="Current preview"
+                      className="w-12 h-12 object-cover rounded-lg border border-slate-200"
+                    />
+                    <span className="text-xs text-slate-500">Current Image Attached</span>
+                  </div>
+                )}
                 <input
                   type="file"
                   accept="image/*"
@@ -211,7 +264,7 @@ export default function AdminProductTable() {
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded-lg transition"
                 >
                   Cancel
@@ -219,9 +272,9 @@ export default function AdminProductTable() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow transition disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow transition disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Saving...' : 'Save Product'}
+                  {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Save Product'}
                 </button>
               </div>
             </form>
@@ -229,6 +282,7 @@ export default function AdminProductTable() {
         </div>
       )}
 
+      {/* Product Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
@@ -237,7 +291,7 @@ export default function AdminProductTable() {
                 <th className="px-6 py-4">Image</th>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Price</th>
+                <th className="px-6 py-4">Weight (kg)</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -252,7 +306,7 @@ export default function AdminProductTable() {
               ) : products.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-slate-400">
-                    No products added yet. Click "Add New Product" to start.
+                    No products added yet. Click &quot;Add New Product&quot; to start.
                   </td>
                 </tr>
               ) : (
@@ -261,7 +315,12 @@ export default function AdminProductTable() {
                     <td className="px-6 py-3">
                       <div className="relative w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
                         {product.image_url ? (
-                          <Image alt={product.name} className="object-cover" fill src={product.image_url} />
+                          <Image
+                            src={product.image_url}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
                             N/A
@@ -271,13 +330,11 @@ export default function AdminProductTable() {
                     </td>
                     <td className="px-6 py-3 font-medium text-slate-900">
                       <div>{product.name}</div>
-                      {product.name_bn && (
-                        <div className="text-xs text-slate-400">{product.name_bn}</div>
-                      )}
+                      {product.name_bn && <div className="text-xs text-slate-400">{product.name_bn}</div>}
                     </td>
                     <td className="px-6 py-3 capitalize">{product.category}</td>
                     <td className="px-6 py-3 font-semibold text-slate-800">
-                      {product.price ? `৳ ${product.price}` : 'N/A'}
+                      {product.weight_kg ? `${product.weight_kg} kg` : 'N/A'}
                     </td>
                     <td className="px-6 py-3">
                       <button
@@ -291,12 +348,19 @@ export default function AdminProductTable() {
                         {product.in_stock ? 'In Stock' : 'Out of Stock'}
                       </button>
                     </td>
-                    <td className="px-6 py-3 text-right">
+                    <td className="px-6 py-3 text-right space-x-2">
+                      <button
+                        onClick={() => openEditModal(product)}
+                        className="text-xs font-semibold text-emerald-600 hover:text-emerald-800 inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
                       <button
                         onClick={() => deleteProduct(product.id)}
-                        className="text-xs font-medium text-rose-600 hover:text-rose-800 hover:underline inline-flex items-center gap-1"
+                        className="text-xs font-semibold text-rose-600 hover:text-rose-800 inline-flex items-center gap-1 ml-2 cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5"/>
+                        <Trash2 className="w-3.5 h-3.5" />
                         <span>Delete</span>
                       </button>
                     </td>

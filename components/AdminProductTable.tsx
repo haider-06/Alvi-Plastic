@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabaseClient';
-import { Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, AlertCircle } from 'lucide-react';
 import { CATEGORIES } from './Header';
 
 interface Product {
@@ -23,6 +23,7 @@ export default function AdminProductTable() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [formError, setFormError] = useState<string>('');
 
   // Form State
   const [name, setName] = useState('');
@@ -60,6 +61,7 @@ export default function AdminProductTable() {
     setWeightKg('');
     setInStock(true);
     setImageFile(null);
+    setFormError('');
     setIsModalOpen(true);
   };
 
@@ -71,59 +73,90 @@ export default function AdminProductTable() {
     setWeightKg(product.weight_kg ? product.weight_kg.toString() : '');
     setInStock(product.in_stock);
     setImageFile(null);
+    setFormError('');
     setIsModalOpen(true);
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setFormError('');
 
-    let finalImageUrl = editingProduct?.image_url || '';
+    try {
+      let finalImageUrl = editingProduct?.image_url || '';
 
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, imageFile);
+      // 1. Handle Image Upload if selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(cleanFileName, imageFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
 
-      if (!uploadError) {
+        if (uploadError) {
+          console.error('Storage Upload Error:', uploadError);
+          setFormError(`Image upload failed: ${uploadError.message}`);
+          setSubmitting(false);
+          return;
+        }
+
         const { data: publicUrlData } = supabase.storage
           .from('product-images')
-          .getPublicUrl(fileName);
+          .getPublicUrl(cleanFileName);
+          
         finalImageUrl = publicUrlData.publicUrl;
       }
-    }
 
-    const payload = {
-      name,
-      name_bn: nameBn || null,
-      category,
-      weight_kg: weightKg ? parseFloat(weightKg) : 0,
-      in_stock: inStock,
-      image_url: finalImageUrl || null,
-    };
+      // 2. Prepare Payload
+      const payload = {
+        name: name.trim(),
+        name_bn: nameBn.trim() || null,
+        category: category.toLowerCase().trim(),
+        weight_kg: weightKg ? parseFloat(weightKg) : 0,
+        in_stock: inStock,
+        image_url: finalImageUrl || null,
+      };
 
-    if (editingProduct) {
-      const { error } = await supabase
-        .from('products')
-        .update(payload)
-        .eq('id', editingProduct.id);
+      if (editingProduct) {
+        // Update Product
+        const { error: updateError } = await supabase
+          .from('products')
+          .update(payload)
+          .eq('id', editingProduct.id);
 
-      if (!error) {
-        setIsModalOpen(false);
-        fetchProducts();
+        if (updateError) {
+          console.error('Update Error:', updateError);
+          setFormError(`Update failed: ${updateError.message}`);
+          setSubmitting(false);
+          return;
+        }
+      } else {
+        // Insert Product
+        const { error: insertError } = await supabase
+          .from('products')
+          .insert([payload]);
+
+        if (insertError) {
+          console.error('Insert Error:', insertError);
+          setFormError(`Save failed: ${insertError.message}`);
+          setSubmitting(false);
+          return;
+        }
       }
-    } else {
-      const { error } = await supabase.from('products').insert([payload]);
 
-      if (!error) {
-        setIsModalOpen(false);
-        fetchProducts();
-      }
+      // Success
+      setIsModalOpen(false);
+      await fetchProducts();
+    } catch (err: any) {
+      console.error('Unexpected Error:', err);
+      setFormError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
   };
 
   const toggleStock = async (id: string, currentStatus: boolean) => {
@@ -136,6 +169,8 @@ export default function AdminProductTable() {
       setProducts((prev) =>
         prev.map((p) => (p.id === id ? { ...p, in_stock: !currentStatus } : p))
       );
+    } else {
+      alert(`Could not update stock: ${error.message}`);
     }
   };
 
@@ -144,6 +179,8 @@ export default function AdminProductTable() {
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (!error) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      alert(`Could not delete product: ${error.message}`);
     }
   };
 
@@ -176,6 +213,13 @@ export default function AdminProductTable() {
               </button>
             </div>
 
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-700 text-xs">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <span>{formError}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Product Name (English) *</label>
@@ -184,7 +228,7 @@ export default function AdminProductTable() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 text-slate-900 bg-white"
                   placeholder="e.g. 4-Layer Heavy Rack"
                 />
               </div>
@@ -195,7 +239,7 @@ export default function AdminProductTable() {
                   type="text"
                   value={nameBn}
                   onChange={(e) => setNameBn(e.target.value)}
-                  className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 text-slate-900 bg-white"
                   placeholder="e.g. ৪-ধাপের হেভি র‍্যাক"
                 />
               </div>
@@ -206,11 +250,11 @@ export default function AdminProductTable() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white text-slate-900"
                   >
-                    {CATEGORIES.filter((c) => c.id !== 'all').map((c) => (
+                    {CATEGORIES.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.en}
+                        {c.en} ({c.bn})
                       </option>
                     ))}
                   </select>
@@ -219,10 +263,10 @@ export default function AdminProductTable() {
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Weight in KG (কেজি)</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="0.001"
                     value={weightKg}
                     onChange={(e) => setWeightKg(e.target.value)}
-                    className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 text-slate-900 bg-white"
                     placeholder="e.g. 1.25"
                   />
                 </div>
@@ -244,7 +288,7 @@ export default function AdminProductTable() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
                 />
               </div>
 
@@ -254,9 +298,9 @@ export default function AdminProductTable() {
                   id="stockToggle"
                   checked={inStock}
                   onChange={(e) => setInStock(e.target.checked)}
-                  className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
+                  className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
                 />
-                <label htmlFor="stockToggle" className="text-sm font-medium text-slate-700">
+                <label htmlFor="stockToggle" className="text-sm font-medium text-slate-700 cursor-pointer">
                   Product is In Stock
                 </label>
               </div>
@@ -265,7 +309,7 @@ export default function AdminProductTable() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded-lg transition"
+                  className="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded-lg transition cursor-pointer"
                 >
                   Cancel
                 </button>

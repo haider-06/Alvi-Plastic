@@ -80,7 +80,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         <a
-          href={`https://wa.me/8801911387551?text=${whatsappText}`}
+          href={`https://wa.me/8801322465611?text=${whatsappText}`}
           target="_blank"
           rel="noopener noreferrer"
           className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow transition cursor-pointer"

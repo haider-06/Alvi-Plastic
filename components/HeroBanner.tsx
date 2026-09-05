@@ -38,7 +38,7 @@ export default function HeroBanner() {
             </a>
 
             <a
-              href="https://wa.me/8801911387551?text=Hello%20Alvi%20Plastic,%20I%20want%20to%20place%20a%20wholesale%20order"
+              href="https://wa.me/8801322465611?text=Hello%20Alvi%20Plastic,%20I%20want%20to%20place%20a%20wholesale%20order"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl transition flex items-center gap-2 text-sm cursor-pointer"

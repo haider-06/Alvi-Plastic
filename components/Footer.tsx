@@ -28,8 +28,8 @@ export default function Footer() {
               <h4>১. {t('showroom')}</h4>
             </div>
             <p className="text-xs text-slate-400">নলগোলা, ইমামগঞ্জ, ঢাকা-১২১১ (Nalgola, Imamganj, Dhaka)</p>
-            <p className="text-xs text-slate-300 font-medium">০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬</p>
-            <p className="text-xs text-slate-300 font-medium">০১৯৭০-১৩৯৪২৫ | ফোন: +৮৮০২২২৬৬৫8১২২</p>
+            <p className="text-xs text-slate-350 font-medium">০১৩২২-৪৬৫৬১১</p>
+            <p className="text-xs text-slate-300 font-medium">০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬,০১৯৭০-১৩৯৪২৫ ফোন: +৮৮০২২২৬৬৫8১২২</p>
           </div>
 
           <div className="space-y-2">

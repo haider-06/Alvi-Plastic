@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Building2, Store, CreditCard, QrCode, MessageCircle } from 'lucide-react';
+import { Building2, Store, User, CreditCard, QrCode, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
@@ -47,7 +47,7 @@ export default function Footer() {
             <p className="text-xs text-slate-300 font-medium">আনোয়ার: ০১৬২৭-৩৫৯১৯৪</p>
           </div>
 
-          {/* Column 4: Alvi (WhatsApp Top) & Md. Ripon (Normal) */}
+          {/* Column 4: Alvi (WhatsApp Top) & Proprietor: Md. Ripon */}
           <div className="space-y-3">
             {/* Alvi - Clickable WhatsApp Link */}
             <div className="bg-slate-800/90 p-3 rounded-xl border border-emerald-500/40">
@@ -70,14 +70,16 @@ export default function Footer() {
               </a>
             </div>
 
-            {/* Md. Ripon - Normal phone format */}
-            <div className="pt-1">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                মোঃ রিপন (Md. Ripon)
-              </h4>
+            {/* ৩. Proprietor: Md. Ripon */}
+            <div className="space-y-1 pt-1">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase">
+                <User className="w-4 h-4" />
+                <h4>৩. {t('proprietor')}</h4>
+              </div>
+              <p className="text-sm font-bold text-white">মোঃ রিপন (Md. Ripon)</p>
               <a
                 href="tel:01911387551"
-                className="text-xs text-slate-300 hover:text-white transition font-medium block"
+                className="text-xs text-emerald-400 font-bold hover:underline block"
               >
                 মোবাইল: ০১৯১১-৩৮৭৫৫১ (01911-387551)
               </a>

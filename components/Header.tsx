@@ -174,7 +174,7 @@ export default function Header({
 
               {isContactOpen && (
                 <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[80vh] overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 z-[100] space-y-4">
-                  {/* Alvi - Prominent WhatsApp link at the TOP */}
+                  {/* Top: Alvi (Direct WhatsApp Link) */}
                   <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
@@ -218,14 +218,15 @@ export default function Header({
                     </p>
                   </div>
 
-                  {/* 3. Md. Ripon (Standard Format) */}
+                  {/* 3. Proprietor (স্বত্বাধিকারী) */}
                   <div className="border-t border-slate-100 pt-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      মোঃ রিপন (Md. Ripon)
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">
+                      ৩. {t('proprietor')}
                     </h4>
+                    <p className="text-sm font-semibold text-slate-800">মোঃ রিপন (Md. Ripon)</p>
                     <a
                       href="tel:01911387551"
-                      className="text-xs text-slate-800 font-semibold hover:text-emerald-600 transition block"
+                      className="text-xs text-slate-800 font-bold hover:text-emerald-600 transition block mt-0.5"
                     >
                       মোবাইল: ০১৯১১-৩৮৭৫৫১ (01911-387551)
                     </a>

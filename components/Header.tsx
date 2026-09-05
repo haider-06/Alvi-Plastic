@@ -182,7 +182,8 @@ export default function Header({
                     </h4>
                     <p className="text-xs text-slate-600">নলগোলা, ইমামগঞ্জ, ঢাকা-১২১১ (Nalgola, Imamganj, Dhaka)</p>
                     <p className="text-xs text-slate-800 font-semibold mt-1">
-                      ০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬, ০১৯৭০-১৩৯৪২৫
+                      
+                      ০১৩২২-৪৬৫৬১১, ০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬, ০১৯৭০-১৩৯৪২৫
                     </p>
                     <p className="text-xs text-slate-500">ফোন: +৮৮০২২২৬৬৫8১২২</p>
                   </div>

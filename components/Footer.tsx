@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Building2, Store, User, CreditCard, QrCode } from 'lucide-react';
+import { Building2, Store, CreditCard, QrCode, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
@@ -13,25 +13,30 @@ export default function Footer() {
     <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 pt-12 pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Column 1: Brand Info */}
           <div className="space-y-3">
             <h3 className="text-xl font-black text-white tracking-wide">Alvi Plastic</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {lang === 'bn'
-                ? 'কারখানা থেকে সরাসরি উন্নতমানের গৃহস্থালি ও ইন্ডাস্ট্রিয়াল প্লাস্টিক পণ্যের পাইকারি প্রস্তুতকারক।'
+                ? 'কারখানা থেকে সরাসরি উন্নতমানের গৃহস্থালি ও ইন্ডাস্ট্রিয়াল প্লাস্টিক পণ্যের পাইকারি প্রস্তুতকারক।'
                 : 'Direct factory wholesale manufacturer and distributor of plastic goods across Bangladesh.'}
             </p>
           </div>
 
+          {/* Column 2: Showroom */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase">
               <Store className="w-4 h-4" />
               <h4>১. {t('showroom')}</h4>
             </div>
             <p className="text-xs text-slate-400">নলগোলা, ইমামগঞ্জ, ঢাকা-১২১১ (Nalgola, Imamganj, Dhaka)</p>
-            <p className="text-xs text-slate-350 font-medium">০১৩২২-৪৬৫৬১১</p>
-            <p className="text-xs text-slate-300 font-medium">০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬,০১৯৭০-১৩৯৪২৫ ফোন: +৮৮০২২২৬৬৫8১২২</p>
+            <p className="text-xs text-slate-300 font-medium">
+              ০১৭৩০-৩৩২5১৬, ০১৭৩০-০৭৩২১৬, ০১৯৭০-১৩৯৪২৫
+            </p>
+            <p className="text-xs text-slate-400">ফোন: +৮৮০২২২৬৬৫8১২২</p>
           </div>
 
+          {/* Column 3: Head Office */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase">
               <Building2 className="w-4 h-4" />
@@ -42,18 +47,45 @@ export default function Footer() {
             <p className="text-xs text-slate-300 font-medium">আনোয়ার: ০১৬২৭-৩৫৯১৯৪</p>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase">
-              <User className="w-4 h-4" />
-              <h4>৩. {t('proprietor')}</h4>
+          {/* Column 4: Alvi (WhatsApp Top) & Md. Ripon (Normal) */}
+          <div className="space-y-3">
+            {/* Alvi - Clickable WhatsApp Link */}
+            <div className="bg-slate-800/90 p-3 rounded-xl border border-emerald-500/40">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                  আলভী (Alvi)
+                </span>
+                <span className="text-[10px] bg-emerald-600 text-white font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  WhatsApp
+                </span>
+              </div>
+              <a
+                href="https://wa.me/8801322465611"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-emerald-300 hover:text-emerald-200 font-bold hover:underline inline-flex items-center gap-1.5 transition"
+              >
+                <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <span>০১৩২২-৪৬৫৬১১ (01322-465611)</span>
+              </a>
             </div>
-            <p className="text-sm font-bold text-white">মোঃ রিপন (Md. Ripon)</p>
-            <a href="tel:01911387551" className="text-xs text-emerald-400 font-bold hover:underline block">
-              মোবাইল: ০১৯১১-৩৮৭৫৫১ (01911-387551)
-            </a>
+
+            {/* Md. Ripon - Normal phone format */}
+            <div className="pt-1">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                মোঃ রিপন (Md. Ripon)
+              </h4>
+              <a
+                href="tel:01911387551"
+                className="text-xs text-slate-300 hover:text-white transition font-medium block"
+              >
+                মোবাইল: ০১৯১১-৩৮৭৫৫১ (01911-387551)
+              </a>
+            </div>
           </div>
         </div>
 
+        {/* Payment Methods & QR Code Section */}
         <div className="border-t border-slate-800 pt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 bg-slate-800/60 rounded-2xl p-6 border border-slate-700/60 space-y-4">
             <div className="flex items-center gap-2 text-white font-bold text-base">
@@ -86,6 +118,7 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* WhatsApp QR Code */}
           <div className="bg-slate-800/60 rounded-2xl p-6 border border-slate-700/60 flex flex-col items-center text-center space-y-3">
             <div className="flex items-center gap-1.5 text-white font-bold text-sm">
               <QrCode className="w-4 h-4 text-emerald-400" />
